@@ -24,7 +24,7 @@ export const getAllBooks = async ({ title, author }: { title?: string, author?: 
     if (author) where.author = author;
 
     return await Book.findAll({ where: where });
-}
+};
 
 export const updateBook = (bookId: number, book: any) => {
     if (!book && !bookId) {

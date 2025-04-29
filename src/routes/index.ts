@@ -4,10 +4,10 @@ import authRouter from "./authRoute";
 import docsRouter from "./docsRoute";
 import userRouter from "./userRoutes";
 import bookRouter from "./bookRoutes";
+import borrowRouter from "./borrowRoutes";
 
 const appRouter = Router();
 
-// all routes
 const appRoutes = [
   {
     path: "/auth",
@@ -20,6 +20,10 @@ const appRoutes = [
   {
     path: "/books",
     router: bookRouter,
+  },
+  {
+    path: "/borrows",
+    router: borrowRouter,
   },
   {
     path: "/docs",

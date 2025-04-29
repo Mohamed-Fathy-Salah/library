@@ -3,7 +3,7 @@ import sequelize from '../db/connection'
 import Borrow from "../models/Borrow";
 import Transaction from "../models/Transaction";
 import Book from "../models/Book";
-import User from "../models/User";
+import { NotFoundError } from "../util/ApiError";
 
 interface BorrowFilters {
     status?: "borrowed" | "returned" | "overdue";
@@ -42,75 +42,61 @@ export const createBorrow = async (payload: any, userId: any) => {
 
 export const getBorrow = async (transactionId: number) => {
     const borrow = await Borrow.findByPk(transactionId, {
-        include: [
-            {
-                model: Transaction,
-                include: [
-                    { model: Book },
-                    { model: User }
-                ]
-            }
-        ]
+        attributes: ['returnDate', "actualReturnDate"],
+        include: [{
+            model: Transaction,
+            attributes: ['id', 'bookId', 'userId', 'created_at']
+        }]
     });
-    return borrow;
+    return { ...borrow.get(), ...borrow.Transaction?.get(), Transaction: undefined };
 };
 
-export const getAllBorrows = async (filters?: BorrowFilters) => {
-    try {
-        const whereClause: any = {};
-        const includeOptions: any = [
-            {
-                model: Transaction,
-                include: [
-                    { model: Book },
-                    { model: User }
-                ]
-            }
-        ];
+export const getAllBorrows = async (isAdmin: boolean, userId: number, filters?: BorrowFilters) => {
+    const whereClause: any = {};
+    const includeOptions: any = [{ model: Transaction, attributes: ['id', 'bookId', 'userId', 'created_at'] }];
+    const attributes: (keyof Borrow)[] = ["returnDate", "actualReturnDate"];
 
-        // todo:Apply status filter
-        //if (filters?.status) {
-        //whereClause.status = filters.status;
-        //}
-
-        // Apply return date range filters
-        if (filters?.returnDateBefore || filters?.returnDateAfter) {
-            whereClause.returnDate = {};
-
-            if (filters.returnDateAfter) {
-                whereClause.returnDate[Op.gte] = filters.returnDateAfter;
-            }
-
-            if (filters.returnDateBefore) {
-                whereClause.returnDate[Op.lte] = filters.returnDateBefore;
-            }
-        }
-
-        // Apply book and user filters through the transaction association
-        if (filters?.bookId || filters?.userId) {
-            const transactionWhere: any = {};
-
-            if (filters.bookId) {
-                transactionWhere.bookId = filters.bookId;
-            }
-
-            if (filters.userId) {
-                transactionWhere.userId = filters.userId;
-            }
-
-            includeOptions[0].where = transactionWhere;
-        }
-
-        const borrows = await Borrow.findAll({
-            where: whereClause,
-            include: includeOptions,
-            order: [[Transaction, "created_at", "DESC"]]
-        });
-
-        return borrows;
-    } catch (error) {
-        throw new Error(`Failed to get borrow records: ${error.message}`);
+    switch (filters?.status) {
+        case 'overdue':
+            whereClause.actualReturnDate = null;
+            whereClause.returnDate = { [Op.lt]: new Date() };
+            break;
+        case 'borrowed':
+            whereClause.actualReturnDate = null;
+            break;
+        case 'returned':
+            whereClause.actualReturnDate = { [Op.not]: null };
+            break;
     }
+
+    if (filters?.returnDateBefore || filters?.returnDateAfter) {
+        whereClause.returnDate = {};
+        if (filters.returnDateAfter)
+            whereClause.returnDate[Op.gte] = filters.returnDateAfter;
+        if (filters.returnDateBefore)
+            whereClause.returnDate[Op.lte] = filters.returnDateBefore;
+    }
+
+    if (filters?.bookId || filters?.userId) {
+        const transactionWhere: any = {};
+        if (filters.bookId)
+            transactionWhere.bookId = filters.bookId;
+        if (filters.userId)
+            transactionWhere.userId = filters.userId;
+        includeOptions[0].where = transactionWhere;
+    }
+
+    if (!isAdmin)
+        includeOptions[0].where = userId;
+
+    const borrows = await Borrow.findAll({
+        attributes,
+        where: whereClause,
+        include: includeOptions,
+        order: [[Transaction, "created_at", "DESC"]]
+    });
+
+    return borrows.map(b => ({ ...b.get(), ...b.Transaction?.get(), Transaction: undefined }));
 };
 
 export const updateBorrow = async (transactionId: number, payload: any) => {
@@ -134,7 +120,7 @@ export const returnBook = async (transactionId: number, userId: number) => {
             lock: t.LOCK.UPDATE,
         });
 
-        if (!borrow?.Transaction) throw new Error("not found");
+        if (!borrow?.Transaction) throw new NotFoundError();
 
         await Book.increment('available', {
             by: 1,
@@ -147,77 +133,4 @@ export const returnBook = async (transactionId: number, userId: number) => {
             { transaction: t }
         );
     });
-};
-
-export const getOverdueBorrows = async () => {
-    try {
-        const today = new Date();
-
-        const borrows = await Borrow.findAll({
-            where: {
-                status: "borrowed",
-                returnDate: {
-                    [Op.lt]: today
-                }
-            },
-            include: [
-                {
-                    model: Transaction,
-                    include: [
-                        { model: Book },
-                        { model: User }
-                    ]
-                }
-            ],
-            order: [["returnDate", "ASC"]]
-        });
-
-        return borrows;
-    } catch (error) {
-        throw new Error(`Failed to get overdue borrow records: ${error.message}`);
-    }
-};
-
-export const getBorrowsByUser = async (userId: number) => {
-    try {
-        const borrows = await Borrow.findAll({
-            include: [
-                {
-                    model: Transaction,
-                    where: { userId },
-                    include: [
-                        { model: Book },
-                        { model: User }
-                    ]
-                }
-            ],
-            order: [["created_at", "DESC"]]
-        });
-
-        return borrows;
-    } catch (error) {
-        throw new Error(`Failed to get borrows by user: ${error.message}`);
-    }
-};
-
-export const getBorrowsByBook = async (bookId: number) => {
-    try {
-        const borrows = await Borrow.findAll({
-            include: [
-                {
-                    model: Transaction,
-                    where: { bookId },
-                    include: [
-                        { model: Book },
-                        { model: User }
-                    ]
-                }
-            ],
-            order: [["created_at", "DESC"]]
-        });
-
-        return borrows;
-    } catch (error) {
-        throw new Error(`Failed to get borrows by book: ${error.message}`);
-    }
 };

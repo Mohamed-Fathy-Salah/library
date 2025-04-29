@@ -4,8 +4,6 @@ import { omit } from "lodash";
 import { customRequest } from "../types/customDefinition";
 import { NotFoundError } from "../util/ApiError";
 
-const omitData = ["password"];
-
 export const updateUser = async (
     req: customRequest,
     res: Response,
@@ -13,7 +11,7 @@ export const updateUser = async (
     const { id: userId } = req.user;
 
     let body = req.body;
-    body = omit(body, omitData);
+    body = omit(body, ["password"]);
 
     const user = await findOneUser({ id: userId });
 

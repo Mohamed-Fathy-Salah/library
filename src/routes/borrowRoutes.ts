@@ -5,9 +5,6 @@ import {
     createBorrowData,
     updateBorrowData,
     returnBookData,
-    getOverdueBorrowsData,
-    getBorrowsByUserData,
-    getBorrowsByBookData,
 } from "../controllers/borrow";
 import { requireUser } from "../middleware";
 
@@ -19,12 +16,10 @@ router.get("/:transactionId", getBorrowData);
 router.post("/", requireUser, createBorrowData);
 router.put("/:transactionId", requireUser, updateBorrowData);
 router.post("/:transactionId/return", requireUser, returnBookData);
-router.get("/overdue/list", getOverdueBorrowsData);
-router.get("/user/:userId", getBorrowsByUserData);
-router.get("/book/:bookId", getBorrowsByBookData);
 
 export default router;
 
+//todo: update new request,response 
 /**
  * @swagger
  * components:
@@ -74,6 +69,8 @@ export default router;
  *   get:
  *     summary: Get all borrows
  *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: status
@@ -126,6 +123,8 @@ export default router;
  *   get:
  *     summary: Get borrow by transaction ID
  *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: transactionId
@@ -265,87 +264,4 @@ export default router;
  *                   example: false
  *       404:
  *         description: Borrow record not found
- */
-
-/**
- * @swagger
- * /borrows/overdue:
- *   get:
- *     summary: Get all overdue borrows
- *     tags: [Borrows]
- *     responses:
- *       200:
- *         description: List of overdue borrows
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Borrow'
- *                 error:
- *                   type: boolean
- *                   example: false
- */
-
-/**
- * @swagger
- * /borrows/user/{userId}:
- *   get:
- *     summary: Get borrows by user ID
- *     tags: [Borrows]
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: integer
- *         required: true
- *         description: User ID
- *     responses:
- *       200:
- *         description: List of borrows for the specified user
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Borrow'
- *                 error:
- *                   type: boolean
- *                   example: false
- */
-
-/**
- * @swagger
- * /borrows/book/{bookId}:
- *   get:
- *     summary: Get borrows by book ID
- *     tags: [Borrows]
- *     parameters:
- *       - in: path
- *         name: bookId
- *         schema:
- *           type: integer
- *         required: true
- *         description: Book ID
- *     responses:
- *       200:
- *         description: List of borrows for the specified book
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Borrow'
- *                 error:
- *                   type: boolean
- *                   example: false
  */

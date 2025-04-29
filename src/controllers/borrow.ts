@@ -6,9 +6,6 @@ import {
     createBorrow,
     updateBorrow,
     returnBook,
-    getOverdueBorrows,
-    getBorrowsByUser,
-    getBorrowsByBook
 } from "../services/borrowService";
 
 export const getBorrowData = async (req: customRequest, res: Response) => {
@@ -26,7 +23,7 @@ export const getAllBorrowsData = async (req: customRequest, res: Response) => {
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
     };
 
-    const borrows = await getAllBorrows(filters);
+    const borrows = await getAllBorrows(req.user.role !== '1', req.user.id, filters);
 
     return res.status(200).json({ data: borrows, error: false });
 };
@@ -46,21 +43,4 @@ export const returnBookData = async (req: customRequest, res: Response) => {
     const transactionId = parseInt(req.params.transactionId);
     await returnBook(transactionId, req.user.id);
     return res.status(200).json({ message: "Book returned successfully", error: false, });
-};
-
-export const getOverdueBorrowsData = async (res: Response) => {
-    const borrows = await getOverdueBorrows();
-    return res.status(200).json({ data: borrows, error: false });
-};
-
-export const getBorrowsByUserData = async (req: customRequest, res: Response) => {
-    const userId = parseInt(req.params.userId);
-    const borrows = await getBorrowsByUser(userId);
-    return res.status(200).json({ data: borrows, error: false });
-};
-
-export const getBorrowsByBookData = async (req: customRequest, res: Response) => {
-    const bookId = parseInt(req.params.bookId);
-    const borrows = await getBorrowsByBook(bookId);
-    return res.status(200).json({ data: borrows, error: false });
 };

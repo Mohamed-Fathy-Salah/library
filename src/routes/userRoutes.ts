@@ -19,7 +19,7 @@ export default userRouter;
 
 /**
  * @swagger
- * /user:
+ * /users:
  *   get:
  *     summary: Get user information
  *     description: Logged in users can fetch only their own user information.

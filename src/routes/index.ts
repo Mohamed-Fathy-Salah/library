@@ -3,8 +3,9 @@ import { Router } from "express";
 import authRouter from "./authRoute";
 import docsRouter from "./docsRoute";
 import userRouter from "./userRoutes";
-import bookRouter from "./bookRoutes";
+import router from "./bookRoutes";
 import borrowRouter from "./borrowRoutes";
+import reportsRouter from "./reportRoutes";
 
 const appRouter = Router();
 
@@ -19,11 +20,15 @@ const appRoutes = [
   },
   {
     path: "/books",
-    router: bookRouter,
+    router: router,
   },
   {
     path: "/borrows",
     router: borrowRouter,
+  },
+  {
+    path: "/reports",
+    router: reportsRouter,
   },
   {
     path: "/docs",

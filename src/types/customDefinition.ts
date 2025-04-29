@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 
 export interface customRequest extends Request {
-  user: any;
+    user: any;
 }
 
 export interface customError extends Error {
-  statusCode: number;
+    statusCode: number;
+    errors?: { message: string }[];
 }
 
 export type ControllerFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction
+    req: Request,
+    res: Response,
+    next: NextFunction
 ) => void;

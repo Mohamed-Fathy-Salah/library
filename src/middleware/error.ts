@@ -1,37 +1,31 @@
 import { customError } from "customDefinition";
 import { NextFunction, Request, Response } from "express";
-import { ApiError } from "../util/ApiError";
+import { ApiError, BadRequestError, ServerError } from "../util/ApiError";
 
-/**
- * Error Handler Middleware
- * @param error
- * @param req
- * @param res
- * @param next
- */
 export const errorHandler = (
-  error: customError,
-  req: Request,
-  res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction
+    error: customError,
+    req: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next: NextFunction
 ): void => {
-  let err = error;
+    let err = error;
 
-  if (!(error instanceof ApiError)) {
-    const statusCode = 500;
-    const message = error.message || "Internal server error";
-    err = new ApiError(statusCode, message);
-  }
+    if (Array.isArray(error.errors)) {
+        const messages = error.errors.map((e) => e.message).filter(Boolean).join(", ");
+        err = new BadRequestError(messages);
+    }
+    else if (!(error instanceof ApiError)) {
+        err = new ServerError(error.message);
+    }
+    const { statusCode, message } = err;
 
-  const { statusCode, message } = err;
+    res.locals.errorMessage = err.message;
 
-  res.locals.errorMessage = err.message;
+    const response = {
+        code: statusCode,
+        message,
+    };
 
-  const response = {
-    code: statusCode,
-    message,
-  };
-
-  res.status(statusCode).send(response);
+    res.status(statusCode).send(response);
 };

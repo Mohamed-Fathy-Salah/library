@@ -1,115 +1,55 @@
 import { encryptSync } from "../util/encrypt";
+import bcrypt from 'bcrypt';
 import User from "../models/User";
 import { Op } from "sequelize";
+import { NotFoundError } from "../util/ApiError";
 
 export const createUser = async (payload: any) => {
-    //todo: add salt 
-    payload.password = encryptSync(payload.password);
-    const user = await User.create(payload);
-    return user;
+    const salt = await bcrypt.genSalt(10);
+    payload.password = await bcrypt.hash(payload.password, salt);
+    return await User.create(payload);
 };
 
 export const getUserById = async (id: number) => {
     const user = await User.findByPk(id, {
         attributes: { exclude: ["password"] },
     });
-    if (!user) {
-        throw new Error("User not found");
-    }
+    if (!user)
+        throw new NotFoundError("User not found");
     return user;
 };
 
-export const userExists = async (
-    options: { email: string | null; mobile: string | null } = {
-        email: null,
-        mobile: null,
-    }
-) => {
-    if (!options.email) {
-        throw new Error("Please provide either of these options: email");
-    }
-    const where: any = {
-        [Op.or]: [],
-    };
-    if (options.email) {
-        where[Op.or].push({ email: options.email });
-    }
-    if (options.mobile) {
-        where[Op.or].push({ email: options.mobile });
-    }
-
-    const users = await User.findAll({ where: where });
-    return users.length > 0;
+export const userExists = async (email: string) => {
+    const count = await User.count({ where: { email } });
+    return count > 0;
 };
 
-export const validatePassword = async (email: string, password: string) => {
-    if (!email && !password) {
-        throw new Error("Please provide email and password");
-    }
-    const where = {
-        [Op.or]: [] as any,
-    };
-
-    if (email) {
-        where[Op.or].push({ email: email });
-    }
-
-    const user = await User.findOne({ where });
-
-    return User.validPassword(password, user.password);
+export const validatePassword = async (user: User, password: string) => {
+    return await User.validPassword(password, user.password);
 };
 
-export const findOneUser = async (options: any) => {
-    if (!options.email && !options.id) {
-        throw new Error("Please provide email or id ");
-    }
-    const where = {
-        [Op.or]: [] as any,
-    };
+export const findOneUser = async (options: any, execludePassword: boolean = true) => {
+    const where = { [Op.or]: [] as any, };
+    const exclude = [];
 
-    if (options.email) {
-        where[Op.or].push({ email: options.email });
-    }
-    if (options.id) {
-        where[Op.or].push({ id: options.id });
-    }
+    if (options.email) where[Op.or].push({ email: options.email });
+    if (options.id) where[Op.or].push({ id: options.id });
+    if (execludePassword) exclude.push("password");
 
     const user = await User.findOne({
         where,
-        attributes: { exclude: ["password"] },
+        attributes: { exclude },
     });
     return user;
 };
 
-export const updateUserById = (user: any, userId: number) => {
-    if (!user && !userId) {
-        throw new Error("Please provide user data and/or user id to update");
-    }
-    if (userId && isNaN(userId)) {
-        throw new Error("Invalid user id");
-    }
-    if (user.id || userId) {
-        const id = user.id || userId;
+export const updateUserById = async (user: any, userId: number) => {
+    if (user.password)
+        user.password = encryptSync(user.password);
 
-        if (user.password) {
-            user.password = encryptSync(user.password);
-        }
-
-        return User.update(user, {
-            where: { id: id },
-        });
-    }
+    return await User.update(user, { where: { id: userId } });
 };
 
-export const deleteUserById = (userId: number) => {
-    if (!userId) {
-        throw new Error("Please user id to delete");
-    }
-    if (userId && isNaN(userId)) {
-        throw new Error("Invalid user id");
-    }
-
-    return User.destroy({
-        where: { id: userId },
-    });
+export const deleteUserById = async (userId: number) => {
+    return await User.destroy({ where: { id: userId }, });
 };

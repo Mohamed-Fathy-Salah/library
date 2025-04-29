@@ -1,49 +1,32 @@
 import { findOneUser, updateUserById } from "../services/userService";
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import { omit } from "lodash";
 import { customRequest } from "../types/customDefinition";
-import { ApiError } from "../util/ApiError";
-const omitData = ["password"];
+import { NotFoundError } from "../util/ApiError";
+
 export const updateUser = async (
-  req: customRequest,
-  res: Response,
-  next: NextFunction
+    req: customRequest,
+    res: Response,
 ) => {
-  try {
     const { id: userId } = req.user;
 
     let body = req.body;
-    body = omit(body, omitData);
+    body = omit(body, ["password"]);
 
     const user = await findOneUser({ id: userId });
 
-    if (!user) {
-      throw new ApiError(400, "User not found");
-    }
+    if (!user)
+        throw new NotFoundError();
 
-    const updated = await updateUserById(body, parseInt(userId, 10));
+    const updated = await updateUserById(body, userId);
 
     return res.status(200).json({
-      updated: updated[0],
-      msg: updated[0] ? "Data updated successfully" : "failed to update",
-      error: false,
+        data: updated[0],
+        message: updated[0] ? "Data updated successfully" : "failed to update",
+        error: false,
     });
-  } catch (err) {
-    next(err);
-  }
 };
 
-export const getUserData = async (
-  req: customRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    return res.status(200).json({
-      data: req.user,
-      error: false,
-    });
-  } catch (err) {
-    next(err);
-  }
+export const getUserData = async (req: customRequest, res: Response,) => {
+    return res.status(200).json({ data: req.user, error: false, });
 };

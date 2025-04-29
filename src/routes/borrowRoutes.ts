@@ -10,12 +10,14 @@ import { requireUser } from "../middleware";
 
 const router = express.Router();
 
+router.use(requireUser);
+
 router.get("/", getAllBorrowsData);
 router.get("/:transactionId", getBorrowData);
 //todo: validate request
-router.post("/", requireUser, createBorrowData);
-router.put("/:transactionId", requireUser, updateBorrowData);
-router.post("/:transactionId/return", requireUser, returnBookData);
+router.post("/", createBorrowData);
+router.put("/:transactionId", updateBorrowData);
+router.post("/:transactionId/return", returnBookData);
 
 export default router;
 

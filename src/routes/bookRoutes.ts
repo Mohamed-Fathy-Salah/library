@@ -1,25 +1,27 @@
 import { Router } from "express";
 import { requireUser, validateRequest } from "../middleware";
 import {
-  getBookData,
-  getBookDataByISBN,
-  getBooks,
-  createBookData,
-  updateBookData,
-  deleteBookData,
+    getBookData,
+    getBookDataByISBN,
+    getBooks,
+    createBookData,
+    updateBookData,
+    deleteBookData,
 } from "../controllers/book";
 import { createBookSchema, updateBookSchema } from "../validation/book";
 
-const bookRouter = Router();
+const router = Router();
 
-bookRouter.get("/:id", requireUser, getBookData);
-bookRouter.get("/isbn/:isbn", requireUser, getBookDataByISBN);
-bookRouter.get("/", requireUser, getBooks);
-bookRouter.post("/", requireUser, validateRequest(createBookSchema), createBookData);
-bookRouter.patch("/:id", requireUser, validateRequest(updateBookSchema), updateBookData);
-bookRouter.delete("/:id", requireUser, deleteBookData);
+router.use(requireUser);
 
-export default bookRouter;
+router.get("/:id", getBookData);
+router.get("/isbn/:isbn", getBookDataByISBN);
+router.get("/", getBooks);
+router.post("/", validateRequest(createBookSchema), createBookData);
+router.patch("/:id", validateRequest(updateBookSchema), updateBookData);
+router.delete("/:id", deleteBookData);
+
+export default router;
 
 /**
  * @swagger

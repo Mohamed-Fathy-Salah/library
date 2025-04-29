@@ -10,7 +10,7 @@ import {
   getBorrowsByUser,
   getBorrowsByBook
 } from "../services/borrowService";
-import { parseInt } from "lodash";
+import { get, parseInt } from "lodash";
 
 /**
  * Get borrow by transaction ID
@@ -68,16 +68,13 @@ export const getAllBorrowsData = async (
   }
 };
 
-/**
- * Create new borrow record
- */
 export const createBorrowData = async (
   req: customRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const borrow = await createBorrow(req.body);
+    const borrow = await createBorrow(req.body, req.user.id);
     
     return res.status(201).json({
       data: borrow,
@@ -88,9 +85,6 @@ export const createBorrowData = async (
   }
 };
 
-/**
- * Update existing borrow record
- */
 export const updateBorrowData = async (
   req: customRequest,
   res: Response,
@@ -116,9 +110,6 @@ export const updateBorrowData = async (
   }
 };
 
-/**
- * Return a book
- */
 export const returnBookData = async (
   req: customRequest,
   res: Response,
@@ -126,17 +117,9 @@ export const returnBookData = async (
 ) => {
   try {
     const transactionId = parseInt(req.params.transactionId, 0);
-    const borrow = await returnBook(transactionId);
-    
-    if (!borrow) {
-      return res.status(404).json({
-        message: "Borrow record not found",
-        error: true,
-      });
-    }
+    await returnBook(transactionId, req.user.id);
     
     return res.status(200).json({
-      data: borrow,
       message: "Book returned successfully",
       error: false,
     });

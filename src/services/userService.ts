@@ -1,10 +1,11 @@
 import { encryptSync } from "../util/encrypt";
+import bcrypt from 'bcrypt';
 import User from "../models/User";
 import { Op } from "sequelize";
 
 export const createUser = async (payload: any) => {
-    //todo: add salt 
-    payload.password = encryptSync(payload.password);
+    const salt = await bcrypt.genSalt(10);
+    payload.password = await bcrypt.hash(payload.password, salt);
     const user = await User.create(payload);
     return user;
 };

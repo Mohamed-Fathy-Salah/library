@@ -1,24 +1,28 @@
 import express from "express";
 import {
-  getBorrowData,
-  getAllBorrowsData,
-  createBorrowData,
-  updateBorrowData,
-  returnBookData,
-  getOverdueBorrowsData,
-  getBorrowsByUserData,
-  getBorrowsByBookData,
+    getBorrowData,
+    getAllBorrowsData,
+    createBorrowData,
+    updateBorrowData,
+    returnBookData,
+    getOverdueBorrowsData,
+    getBorrowsByUserData,
+    getBorrowsByBookData,
 } from "../controllers/borrow";
+import { requireUser } from "../middleware";
 
 const router = express.Router();
+
 router.get("/", getAllBorrowsData);
 router.get("/:transactionId", getBorrowData);
-router.post("/", createBorrowData);
-router.put("/:transactionId", updateBorrowData);
-router.post("/:transactionId/return", returnBookData);
+//todo: validate request
+router.post("/", requireUser, createBorrowData);
+router.put("/:transactionId", requireUser, updateBorrowData);
+router.post("/:transactionId/return", requireUser, returnBookData);
 router.get("/overdue/list", getOverdueBorrowsData);
 router.get("/user/:userId", getBorrowsByUserData);
 router.get("/book/:bookId", getBorrowsByBookData);
+
 export default router;
 
 /**
@@ -29,7 +33,6 @@ export default router;
  *       type: object
  *       required:
  *         - transactionId
- *         - status
  *       properties:
  *         transactionId:
  *           type: integer
@@ -42,10 +45,6 @@ export default router;
  *           type: string
  *           format: date-time
  *           description: Actual date when the book was returned
- *         status:
- *           type: string
- *           enum: [borrowed, returned, overdue]
- *           description: Current status of the borrowed book
  *         created_at:
  *           type: string
  *           format: date-time
@@ -58,7 +57,6 @@ export default router;
  *         transactionId: 1
  *         returnDate: "2025-05-15T00:00:00.000Z"
  *         actualReturnDate: null
- *         status: "borrowed"
  *         created_at: "2025-04-23T18:25:43.511Z"
  *         last_updated: "2025-04-23T18:25:43.511Z"
  */
@@ -72,7 +70,7 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows:
+ * /borrows:
  *   get:
  *     summary: Get all borrows
  *     tags: [Borrows]
@@ -124,7 +122,7 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/{transactionId}:
+ * /borrows/{transactionId}:
  *   get:
  *     summary: Get borrow by transaction ID
  *     tags: [Borrows]
@@ -154,10 +152,12 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows:
+ * /borrows:
  *   post:
  *     summary: Create a new borrow record
  *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -167,15 +167,11 @@ export default router;
  *             required:
  *               - transactionId
  *             properties:
- *               transactionId:
+ *               bookId:
  *                 type: integer
  *               returnDate:
  *                 type: string
  *                 format: date-time
- *               status:
- *                 type: string
- *                 enum: [borrowed, returned, overdue]
- *                 default: borrowed
  *     responses:
  *       201:
  *         description: Borrow record created successfully
@@ -193,10 +189,12 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/{transactionId}:
+ * /borrows/{transactionId}:
  *   put:
  *     summary: Update a borrow record
  *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: transactionId
@@ -217,9 +215,6 @@ export default router;
  *               actualReturnDate:
  *                 type: string
  *                 format: date-time
- *               status:
- *                 type: string
- *                 enum: [borrowed, returned, overdue]
  *     responses:
  *       200:
  *         description: Borrow record updated successfully
@@ -239,10 +234,12 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/{transactionId}/return:
+ * /borrows/{transactionId}/return:
  *   post:
  *     summary: Mark a book as returned
  *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: transactionId
@@ -272,7 +269,7 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/overdue:
+ * /borrows/overdue:
  *   get:
  *     summary: Get all overdue borrows
  *     tags: [Borrows]
@@ -295,7 +292,7 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/user/{userId}:
+ * /borrows/user/{userId}:
  *   get:
  *     summary: Get borrows by user ID
  *     tags: [Borrows]
@@ -325,7 +322,7 @@ export default router;
 
 /**
  * @swagger
- * /api/borrows/book/{bookId}:
+ * /borrows/book/{bookId}:
  *   get:
  *     summary: Get borrows by book ID
  *     tags: [Borrows]

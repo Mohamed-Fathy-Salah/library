@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Book from "../models/Book";
 
 export const createBook = async (payload: any) => {
@@ -19,9 +20,8 @@ export const getBookByISBN = async (ISBN: string) => {
 
 export const getAllBooks = async ({ title, author }: { title?: string, author?: string }) => {
     const where: any = {};
-    //todo: search with fuzzy finder
-    if (title) where.title = title;
-    if (author) where.author = author;
+    if (title) where.title = { [Op.iLike]: `${title}%` };
+    if (author) where.author = { [Op.iLike]: `${author}%` };
 
     return await Book.findAll({ where: where });
 };

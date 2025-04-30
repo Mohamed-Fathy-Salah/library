@@ -177,6 +177,8 @@ export default router;
  *             required:
  *               - transactionId
  *             properties:
+ *               borrowerId:
+ *                 type: integer
  *               bookId:
  *                 type: integer
  *               returnDate:
@@ -195,51 +197,6 @@ export default router;
  *                 error:
  *                   type: boolean
  *                   example: false
- */
-
-/**
- * @swagger
- * /borrows/{transactionId}:
- *   put:
- *     summary: Update a borrow record
- *     tags: [Borrows]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: transactionId
- *         schema:
- *           type: integer
- *         required: true
- *         description: Transaction ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               returnDate:
- *                 type: string
- *                 format: date-time
- *               actualReturnDate:
- *                 type: string
- *                 format: date-time
- *     responses:
- *       200:
- *         description: Borrow record updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/Borrow'
- *                 error:
- *                   type: boolean
- *                   example: false
- *       404:
- *         description: Borrow record not found
  */
 
 /**

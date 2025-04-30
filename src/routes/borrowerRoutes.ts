@@ -28,6 +28,7 @@ export default router;
  *     summary: Get all borrowers
  *     security:
  *       - bearerAuth: []
+ *     tags: [Borrower]
  *     parameters:
  *       - in: query
  *         name: page
@@ -49,6 +50,7 @@ export default router;
  *     summary: Create a new borrower
  *     security:
  *       - bearerAuth: []
+ *     tags: [Borrower]
  *     requestBody:
  *       required: true
  *       content:
@@ -73,6 +75,7 @@ export default router;
  *     summary: Get borrower by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Borrower]
  *     parameters:
  *       - in: path
  *         name: id
@@ -87,6 +90,7 @@ export default router;
  *     summary: Update borrower by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Borrower]
  *     parameters:
  *       - in: path
  *         name: id
@@ -112,6 +116,7 @@ export default router;
  *     summary: Delete borrower by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Borrower]
  *     parameters:
  *       - in: path
  *         name: id

@@ -36,6 +36,9 @@ Borrow.init(
         sequelize: sequelizeConnection,
         tableName: "borrows",
         timestamps: false,
+        indexes: [
+            { fields: ['returnDate'] }
+        ]
     }
 );
 

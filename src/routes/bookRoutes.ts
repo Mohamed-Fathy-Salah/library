@@ -30,6 +30,7 @@ export default router;
  *     summary: Get all books
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     parameters:
  *       - in: query
  *         name: page
@@ -51,6 +52,7 @@ export default router;
  *     summary: Create a new book
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     requestBody:
  *       required: true
  *       content:
@@ -81,6 +83,7 @@ export default router;
  *     summary: Get book by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     parameters:
  *       - in: path
  *         name: id
@@ -95,6 +98,7 @@ export default router;
  *     summary: Update book by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     parameters:
  *       - in: path
  *         name: id
@@ -126,6 +130,7 @@ export default router;
  *     summary: Delete book by ID
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     parameters:
  *       - in: path
  *         name: id
@@ -144,6 +149,7 @@ export default router;
  *     summary: Get book by ISBN
  *     security:
  *       - bearerAuth: []
+ *     tags: [Books]
  *     parameters:
  *       - in: path
  *         name: isbn

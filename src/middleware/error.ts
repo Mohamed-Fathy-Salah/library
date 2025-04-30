@@ -12,7 +12,7 @@ export const errorHandler = (
     let err = error;
 
     if (Array.isArray(error.errors)) {
-        const messages = error.errors.map((e) => e.message).filter(Boolean).join(", ");
+        const messages = "Please send valid request"
         err = new BadRequestError(messages);
     }
     else if (!(error instanceof ApiError)) {

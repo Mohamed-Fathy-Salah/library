@@ -58,6 +58,8 @@ export const getBorrow = async (transactionId: number) => {
       },
     ],
   });
+  if(!borrow)
+      throw new NotFoundError();
   return {
     ...borrow.get(),
     ...borrow.Transaction?.get(),
@@ -206,7 +208,7 @@ export const returnBook = async (transactionId: number) => {
         attributes: ["bookId"],
       },
       transaction: t,
-      lock: t.LOCK.UPDATE,
+      lock: { level: t.LOCK.UPDATE, of: Borrow },
     });
 
     if (!borrow?.Transaction) throw new NotFoundError();
@@ -230,7 +232,7 @@ export const deleteBorrow = async (transactionId: number) => {
         attributes: ["bookId"],
       },
       transaction: t,
-      lock: t.LOCK.UPDATE,
+      lock: { level: t.LOCK.UPDATE, of: Borrow },
     });
 
     if (!borrow?.Transaction) throw new NotFoundError();

@@ -44,6 +44,11 @@ Transaction.init(
         tableName: "transactions",
         createdAt: "created_at",
         updatedAt: "last_updated",
+        indexes: [
+            { fields: ['bookId'] },
+            { fields: ['borrowerId'] },
+            { fields: ['created_at'] },
+        ]
     }
 );
 

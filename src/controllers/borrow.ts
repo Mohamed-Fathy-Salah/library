@@ -21,6 +21,8 @@ export const getAllBorrowsData = async (req: customRequest, res: Response) => {
         returnDateAfter: req.query.returnDateAfter ? new Date(req.query.returnDateAfter as string) : undefined,
         bookId: req.query.bookId ? parseInt(req.query.bookId as string) : undefined,
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
     };
 
     const borrows = await getAllBorrowsPaginated(filters);

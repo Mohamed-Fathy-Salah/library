@@ -7,7 +7,7 @@ A Dockerized Node.js + Express + PostgreSQL application for managing library ope
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com//library.git
+git clone https://github.com/Mohamed-Fathy-Salah/library.git
 cd library
 ```
 

@@ -1,27 +1,25 @@
 import express from "express";
 import {
-    getBorrowData,
-    getAllBorrowsData,
-    createBorrowData,
-    updateBorrowData,
-    returnBookData,
+  getBorrowData,
+  getAllBorrowsData,
+  createBorrowData,
+  updateBorrowData,
+  returnBookData,
 } from "../controllers/borrow";
-import { requireUser } from "../middleware";
+import { defaultLimiter, requireUser } from "../middleware";
 
 const router = express.Router();
 
-router.use(requireUser);
-
-router.get("/", getAllBorrowsData);
-router.get("/:transactionId", getBorrowData);
+router.get("/", requireUser, getAllBorrowsData);
+router.get("/:transactionId", requireUser, getBorrowData);
 //todo: validate request
-router.post("/", createBorrowData);
-router.put("/:transactionId", updateBorrowData);
-router.post("/:transactionId/return", returnBookData);
+router.post("/", defaultLimiter, requireUser, createBorrowData);
+router.put("/:transactionId", requireUser, updateBorrowData);
+router.post("/:transactionId/return", requireUser, returnBookData);
 
 export default router;
 
-//todo: update new request,response 
+//todo: update new request,response
 /**
  * @swagger
  * components:

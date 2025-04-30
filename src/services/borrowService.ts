@@ -243,6 +243,6 @@ export const deleteBorrow = async (transactionId: number) => {
       transaction: t,
     });
 
-    await borrow.destroy({transaction: t})
+    await borrow.destroy({transaction: t});
   });
-}
+};

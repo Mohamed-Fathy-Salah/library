@@ -37,7 +37,7 @@ Borrow.init(
         tableName: "borrows",
         timestamps: false,
         indexes: [
-            { fields: ['returnDate'] }
+            { fields: ["returnDate"] }
         ]
     }
 );

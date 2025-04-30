@@ -45,14 +45,14 @@ Transaction.init(
         createdAt: "created_at",
         updatedAt: "last_updated",
         indexes: [
-            { fields: ['bookId'] },
-            { fields: ['borrowerId'] },
-            { fields: ['created_at'] },
+            { fields: ["bookId"] },
+            { fields: ["borrowerId"] },
+            { fields: ["created_at"] },
         ]
     }
 );
 
-Transaction.belongsTo(Book, { foreignKey: 'bookId' });
-Transaction.belongsTo(Borrower, { foreignKey: 'borrowerId' });
+Transaction.belongsTo(Book, { foreignKey: "bookId" });
+Transaction.belongsTo(Borrower, { foreignKey: "borrowerId" });
 
 export default Transaction;

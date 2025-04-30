@@ -1,5 +1,5 @@
 import { encryptSync } from "../util/encrypt";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 import User from "../models/User";
 import { Op } from "sequelize";
 import { NotFoundError } from "../util/ApiError";

@@ -12,7 +12,7 @@ export const getAllBorrowsData = async (req: customRequest, res: Response) => {
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
     };
 
-    const borrows = await getAllBorrows(req.user.role !== '1', req.user.id, filters);
+    const borrows = await getAllBorrows(filters);
     const parser = new Parser();
     const csv = parser.parse(borrows);
 

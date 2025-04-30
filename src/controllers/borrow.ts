@@ -2,7 +2,7 @@ import { Response } from "express";
 import { customRequest } from "../types/customDefinition";
 import {
     getBorrow,
-    getAllBorrows,
+    getAllBorrowsPaginated,
     createBorrow,
     updateBorrow,
     returnBook,
@@ -23,7 +23,7 @@ export const getAllBorrowsData = async (req: customRequest, res: Response) => {
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
     };
 
-    const borrows = await getAllBorrows(req.user.role !== '1', req.user.id, filters);
+    const borrows = await getAllBorrowsPaginated(req.user.role !== '1', req.user.id, filters);
 
     return res.status(200).json({ data: borrows, error: false });
 };

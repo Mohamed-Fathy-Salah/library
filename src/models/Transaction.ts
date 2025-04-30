@@ -1,13 +1,12 @@
 import { DataTypes, Model } from "sequelize";
 import sequelizeConnection from "../db/connection";
 import Book from "./Book";
-import User from "./User";
-import Borrow from "./Borrow";
+import Borrower from "./Borrower";
 
 class Transaction extends Model {
     public id!: number;
     public bookId!: string;
-    public userId!: string;
+    public borrowerId!: string;
 
     // timestamps!
     public readonly created_at!: Date;
@@ -30,14 +29,14 @@ Transaction.init(
             },
             onDelete: "CASCADE", // If the book is deleted, also delete related transactions
         },
-        userId: {
+        borrowerId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
                 model: "users",
                 key: "id",
             },
-            onDelete: "CASCADE", // If the user is deleted, also delete related transactions
+            onDelete: "CASCADE", // If the borrower is deleted, also delete related transactions
         },
     },
     {
@@ -45,10 +44,15 @@ Transaction.init(
         tableName: "transactions",
         createdAt: "created_at",
         updatedAt: "last_updated",
+        indexes: [
+            { fields: ["bookId"] },
+            { fields: ["borrowerId"] },
+            { fields: ["created_at"] },
+        ]
     }
 );
 
-Transaction.belongsTo(Book, { foreignKey: 'bookId' });
-Transaction.belongsTo(User, { foreignKey: 'userId' });
+Transaction.belongsTo(Book, { foreignKey: "bookId" });
+Transaction.belongsTo(Borrower, { foreignKey: "borrowerId" });
 
 export default Transaction;

@@ -53,6 +53,11 @@ Book.init(
         tableName: "books",
         createdAt: "created_at",
         updatedAt: "last_updated",
+        indexes: [
+            {fields: ["title"]},
+            {fields: ["author"]},
+            {unique: true, fields: ["ISBN"]},
+        ]
     }
 );
 

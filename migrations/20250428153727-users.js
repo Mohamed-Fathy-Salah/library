@@ -20,13 +20,29 @@ module.exports = {
             password: {
                 type: Sequelize.STRING,
             },
-            status: {
-                type: Sequelize.INTEGER,
-                defaultValue: 1,
+            created_at: {
+                type: Sequelize.DATE,
+                allowNull: false,
             },
-            role: {
+            last_updated: {
+                type: Sequelize.DATE,
+                allowNull: false,
+            },
+        });
+        await queryInterface.createTable('borrowers', {
+            id: {
                 type: Sequelize.INTEGER,
-                defaultValue: 2,
+                autoIncrement: true,
+                primaryKey: true,
+            },
+            name: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            email: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                unique: true,
             },
             created_at: {
                 type: Sequelize.DATE,
@@ -41,5 +57,6 @@ module.exports = {
 
     async down(queryInterface, Sequelize) {
         await queryInterface.dropTable('users');
+        await queryInterface.dropTable('borrowers');
     }
 };

@@ -3,25 +3,22 @@ import {
     getBorrowData,
     getAllBorrowsData,
     createBorrowData,
-    updateBorrowData,
     returnBookData,
+    deleteBorrowById,
 } from "../controllers/borrow";
-import { requireUser } from "../middleware";
+import { defaultLimiter, requireUser, validateRequest } from "../middleware";
+import { createBorrowSchema } from "../validation/borrow";
 
 const router = express.Router();
 
-router.use(requireUser);
-
-router.get("/", getAllBorrowsData);
-router.get("/:transactionId", getBorrowData);
-//todo: validate request
-router.post("/", createBorrowData);
-router.put("/:transactionId", updateBorrowData);
-router.post("/:transactionId/return", returnBookData);
+router.get("/", requireUser, getAllBorrowsData);
+router.get("/:transactionId", requireUser, getBorrowData);
+router.post("/", defaultLimiter, requireUser, validateRequest(createBorrowSchema), createBorrowData);
+router.post("/:transactionId/return", requireUser, returnBookData);
+router.delete("/:transactionId", requireUser, deleteBorrowById);
 
 export default router;
 
-//todo: update new request,response 
 /**
  * @swagger
  * components:
@@ -102,6 +99,18 @@ export default router;
  *         schema:
  *           type: integer
  *         description: Filter by user ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: page number
+ *         default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: page count
+ *         default: 10
  *     responses:
  *       200:
  *         description: List of borrows
@@ -168,6 +177,8 @@ export default router;
  *             required:
  *               - transactionId
  *             properties:
+ *               borrowerId:
+ *                 type: integer
  *               bookId:
  *                 type: integer
  *               returnDate:
@@ -186,51 +197,6 @@ export default router;
  *                 error:
  *                   type: boolean
  *                   example: false
- */
-
-/**
- * @swagger
- * /borrows/{transactionId}:
- *   put:
- *     summary: Update a borrow record
- *     tags: [Borrows]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: transactionId
- *         schema:
- *           type: integer
- *         required: true
- *         description: Transaction ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               returnDate:
- *                 type: string
- *                 format: date-time
- *               actualReturnDate:
- *                 type: string
- *                 format: date-time
- *     responses:
- *       200:
- *         description: Borrow record updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/Borrow'
- *                 error:
- *                   type: boolean
- *                   example: false
- *       404:
- *         description: Borrow record not found
  */
 
 /**
@@ -266,4 +232,27 @@ export default router;
  *                   example: false
  *       404:
  *         description: Borrow record not found
+ */
+
+/**
+ * @swagger
+ * /borrows/{transactionId}:
+ *   delete:
+ *     summary: Delete a borrow record by transaction ID
+ *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: transactionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Borrow record deleted
+ *       404:
+ *         description: Borrow not found
+ *       401:
+ *         description: Unauthorized
  */

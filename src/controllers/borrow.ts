@@ -4,8 +4,8 @@ import {
     getBorrow,
     getAllBorrowsPaginated,
     createBorrow,
-    updateBorrow,
     returnBook,
+    deleteBorrow,
 } from "../services/borrowService";
 
 export const getBorrowData = async (req: customRequest, res: Response) => {
@@ -23,24 +23,24 @@ export const getAllBorrowsData = async (req: customRequest, res: Response) => {
         userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
     };
 
-    const borrows = await getAllBorrowsPaginated(req.user.role !== '1', req.user.id, filters);
+    const borrows = await getAllBorrowsPaginated(filters);
 
     return res.status(200).json({ data: borrows, error: false });
 };
 
 export const createBorrowData = async (req: customRequest, res: Response) => {
-    const borrow = await createBorrow(req.body, req.user.id);
+    const borrow = await createBorrow(req.body);
     return res.status(201).json({ data: borrow, error: false });
-};
-
-export const updateBorrowData = async (req: customRequest, res: Response) => {
-    const transactionId = parseInt(req.params.transactionId);
-    const borrow = await updateBorrow(transactionId, req.body);
-    return res.status(200).json({ data: borrow, error: false });
 };
 
 export const returnBookData = async (req: customRequest, res: Response) => {
     const transactionId = parseInt(req.params.transactionId);
-    await returnBook(transactionId, req.user.id);
+    await returnBook(transactionId);
     return res.status(200).json({ message: "Book returned successfully", error: false, });
+};
+
+export const deleteBorrowById = async (req: customRequest, res: Response) => {
+    const transactionId = parseInt(req.params.transactionId);
+    await deleteBorrow(transactionId);
+    return res.status(200).json({ message: "Deleted successfully", error: false, });
 };

@@ -2,13 +2,11 @@ import express from "express";
 import {
     getAllBorrowsData,
 } from "../controllers/reports";
-import { defaultLimiter, isAdmin, requireUser } from "../middleware";
+import { defaultLimiter, requireUser } from "../middleware";
 
 const router = express.Router();
 
-router.use(defaultLimiter);
-
-router.get("/", isAdmin, getAllBorrowsData);
+router.get("/", defaultLimiter, requireUser, getAllBorrowsData);
 
 export default router;
 

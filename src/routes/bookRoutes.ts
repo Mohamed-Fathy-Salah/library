@@ -14,9 +14,9 @@ const router = Router();
 
 router.use(requireUser);
 
+router.get("/", getBooks);
 router.get("/:id", getBookData);
 router.get("/isbn/:isbn", getBookDataByISBN);
-router.get("/", getBooks);
 router.post("/", validateRequest(createBookSchema), createBookData);
 router.patch("/:id", validateRequest(updateBookSchema), updateBookData);
 router.delete("/:id", deleteBookData);
@@ -25,9 +25,53 @@ export default router;
 
 /**
  * @swagger
- * tags:
- *   name: Book
- *   description: Operations related to books
+ * /books:
+ *   get:
+ *     summary: Get all books
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: page number
+ *         default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: page count
+ *         default: 10
+ *     responses:
+ *       200:
+ *         description: List of books
+
+ *   post:
+ *     summary: Create a new book
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, author, ISBN, quantity, shelfLocation]
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               ISBN:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *               shelfLocation:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Book created
  */
 
 /**
@@ -35,20 +79,62 @@ export default router;
  * /books/{id}:
  *   get:
  *     summary: Get book by ID
- *     tags: [Book]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: integer
  *     responses:
- *       "200":
- *         description: OK
- *       "404":
- *         description: Book not found
+ *       200:
+ *         description: Book data
+
+ *   patch:
+ *     summary: Update book by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               ISBN:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *               shelfLocation:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Book updated
+
+ *   delete:
+ *     summary: Delete book by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Book deleted
  */
 
 /**
@@ -56,124 +142,17 @@ export default router;
  * /books/isbn/{isbn}:
  *   get:
  *     summary: Get book by ISBN
- *     tags: [Book]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: isbn
- *         in: path
+ *       - in: path
+ *         name: isbn
  *         required: true
  *         schema:
  *           type: string
  *     responses:
- *       "200":
- *         description: OK
- *       "404":
+ *       200:
+ *         description: Book data
+ *       404:
  *         description: Book not found
- */
-
-/**
- * @swagger
- * /books:
- *   get:
- *     summary: Get books by author and/or title
- *     tags: [Book]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: author
- *         in: query
- *         schema:
- *           type: string
- *       - name: title
- *         in: query
- *         schema:
- *           type: string
- *     responses:
- *       "200":
- *         description: OK
- *       "404":
- *         description: No books found
- *   post:
- *     summary: Create a new book
- *     tags: [Book]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Book'
- *     responses:
- *       "201":
- *         description: Created
- */
-
-/**
- * @swagger
- * /books/{id}:
- *   patch:
- *     summary: Update a book
- *     tags: [Book]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Book'
- *     responses:
- *       "200":
- *         description: OK
- *       "404":
- *         description: Book not found
- *   delete:
- *     summary: Delete a book
- *     tags: [Book]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       "200":
- *         description: Deleted
- *       "404":
- *         description: Book not found
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Book:
- *       type: object
- *       properties:
- *         title:
- *           type: string
- *         author:
- *           type: string
- *         ISBN:
- *           type: string
- *         shelfLocation:
- *           type: string
- *         quantity:
- *           type: integer
- *       required:
- *         - title
- *         - author
- *         - ISBN
- *         - shelfLocation
- *         - quantity
  */

@@ -15,7 +15,7 @@ const deserializeUser = async (
   }
   if (!token) return next();
 
-  const { decoded, expired, valid, msg: errorMsg } = verify(token);
+  const { decoded, expired, valid, msg: message } = verify(token);
 
   if (valid && !expired) {
     req.user = decoded;
@@ -23,7 +23,7 @@ const deserializeUser = async (
   } else {
     return res.status(403).json({
       error: true,
-      errorMsg: errorMsg,
+      message,
     });
   }
 };

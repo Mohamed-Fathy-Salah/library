@@ -5,6 +5,7 @@ import docsRouter from "./docsRoute";
 import userRouter from "./userRoutes";
 import router from "./bookRoutes";
 import borrowRouter from "./borrowRoutes";
+import borrowerRouter from "./borrowerRoutes";
 import reportsRouter from "./reportRoutes";
 
 const appRouter = Router();
@@ -17,6 +18,10 @@ const appRoutes = [
   {
     path: "/users",
     router: userRouter,
+  },
+  {
+    path: "/borrowers",
+    router: borrowerRouter,
   },
   {
     path: "/books",

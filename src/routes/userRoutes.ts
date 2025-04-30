@@ -5,8 +5,10 @@ import { updateSchema } from "../validation/user";
 
 const userRouter = Router();
 
-userRouter.patch("/", requireUser, validateRequest(updateSchema), updateUser);
-userRouter.get("/", requireUser, getUserData);
+userRouter.use(requireUser);
+
+userRouter.patch("/", validateRequest(updateSchema), updateUser);
+userRouter.get("/", getUserData);
 
 export default userRouter;
 

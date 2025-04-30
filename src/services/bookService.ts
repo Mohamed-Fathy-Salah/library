@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import Book from "../models/Book";
-import { NotFoundError } from "../util/ApiError";
+import sequelize from "../db/connection";
+import { BadRequestError, NotFoundError } from "../util/ApiError";
 
 export const createBook = async (payload: any) => {
   payload.available = payload.quantity;
@@ -40,9 +41,23 @@ export const getAllBooks = async ({
 };
 
 export const updateBook = async (bookId: number, book: any) => {
-  const [affectedCount] = await Book.update(book, { where: { id: bookId } });
-  //todo: if updated quantity. update the available amount in transaction with row locking
-  if (affectedCount == 0) throw new NotFoundError();
+  await sequelize.transaction(async t => {
+    const existing = await Book.findByPk(bookId, {
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+
+    if (!existing) throw new NotFoundError();
+
+    if (book.quantity !== undefined) {
+      if (existing.available > book.quantity) {
+        throw new BadRequestError("New quantity cannot be less than current available copies.");
+      }
+      existing.available += book.quantity - existing.quantity;
+    }
+
+    await existing.update(book, { transaction: t });
+  });
 };
 
 export const deleteBook = async (id: number) => {

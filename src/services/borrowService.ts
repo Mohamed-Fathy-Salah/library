@@ -4,19 +4,19 @@ import Borrow from "../models/Borrow";
 import Transaction from "../models/Transaction";
 import Book from "../models/Book";
 import { NotFoundError } from "../util/ApiError";
-import User from "../models/User";
+import Borrower from "../models/Borrower";
 
 interface BorrowFilters {
   status?: "borrowed" | "returned" | "overdue";
   returnDateBefore?: Date;
   returnDateAfter?: Date;
   bookId?: number;
-  userId?: number;
+  borrowerId?: number;
   page?: number;
   limit?: number;
 }
 
-export const createBorrow = async (payload: any, userId: any) => {
+export const createBorrow = async (payload: any) => {
   await sequelize.transaction(async t => {
     const book = await Book.findOne({
       where: { id: payload.bookId, available: { [Op.gt]: 0 } },
@@ -33,7 +33,7 @@ export const createBorrow = async (payload: any, userId: any) => {
     const { id: transactionId } = await Transaction.create(
       {
         bookId: payload.bookId,
-        userId: userId,
+        borrowerId: payload.borrowerId,
       },
       { transaction: t }
     );
@@ -54,7 +54,7 @@ export const getBorrow = async (transactionId: number) => {
     include: [
       {
         model: Transaction,
-        attributes: ["id", "bookId", "userId", "created_at"],
+        attributes: ["id", "bookId", "borrowerId", "created_at"],
       },
     ],
   });
@@ -77,7 +77,7 @@ export const getAllBorrows = async (filters?: BorrowFilters) => {
           attributes: ["title"],
         },
         {
-          model: User,
+          model: Borrower,
           attributes: ["email"],
         },
       ],
@@ -106,10 +106,10 @@ export const getAllBorrows = async (filters?: BorrowFilters) => {
       whereClause.returnDate[Op.lte] = filters.returnDateBefore;
   }
 
-  if (filters?.bookId || filters?.userId) {
+  if (filters?.bookId || filters?.borrowerId) {
     const transactionWhere: any = {};
     if (filters.bookId) transactionWhere.bookId = filters.bookId;
-    if (filters.userId) transactionWhere.userId = filters.userId;
+    if (filters.borrowerId) transactionWhere.borrowerId = filters.borrowerId;
     includeOptions[0].where = transactionWhere;
   }
 
@@ -136,15 +136,13 @@ export const getAllBorrows = async (filters?: BorrowFilters) => {
 };
 
 export const getAllBorrowsPaginated = async (
-  isAdmin: boolean,
-  userId: number,
   filters?: BorrowFilters
 ) => {
   const whereClause: any = {};
   const includeOptions: any = [
     {
       model: Transaction,
-      attributes: ["id", "bookId", "userId", "created_at"],
+      attributes: ["id", "bookId", "borrowerId", "created_at"],
     },
   ];
   const attributes: (keyof Borrow)[] = ["returnDate", "actualReturnDate"];
@@ -170,14 +168,12 @@ export const getAllBorrowsPaginated = async (
       whereClause.returnDate[Op.lte] = filters.returnDateBefore;
   }
 
-  if (filters?.bookId || filters?.userId) {
+  if (filters?.bookId || filters?.borrowerId) {
     const transactionWhere: any = {};
     if (filters.bookId) transactionWhere.bookId = filters.bookId;
-    if (filters.userId) transactionWhere.userId = filters.userId;
+    if (filters.borrowerId) transactionWhere.borrowerId = filters.borrowerId;
     includeOptions[0].where = transactionWhere;
   }
-
-  if (!isAdmin) includeOptions[0].where = userId;
 
   const page = filters.page || 1;
   const limit = filters.limit || 10;
@@ -201,25 +197,13 @@ export const getAllBorrowsPaginated = async (
   };
 };
 
-export const updateBorrow = async (transactionId: number, payload: any) => {
-  try {
-    const borrow = await Borrow.findByPk(transactionId);
-    if (!borrow) return null;
-    await borrow.update(payload);
-    return await getBorrow(transactionId);
-  } catch (error) {
-    throw new Error(`Failed to update borrow record: ${error.message}`);
-  }
-};
-
-export const returnBook = async (transactionId: number, userId: number) => {
+export const returnBook = async (transactionId: number) => {
   await sequelize.transaction(async t => {
     const borrow = await Borrow.findOne({
       where: { transactionId, actualReturnDate: null },
       include: {
         model: Transaction,
         attributes: ["bookId"],
-        where: { userId },
       },
       transaction: t,
       lock: t.LOCK.UPDATE,
@@ -236,3 +220,27 @@ export const returnBook = async (transactionId: number, userId: number) => {
     await borrow.update({ actualReturnDate: new Date() }, { transaction: t });
   });
 };
+
+export const deleteBorrow = async (transactionId: number) => {
+  await sequelize.transaction(async t => {
+    const borrow = await Borrow.findOne({
+      where: { transactionId, actualReturnDate: null },
+      include: {
+        model: Transaction,
+        attributes: ["bookId"],
+      },
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+
+    if (!borrow?.Transaction) throw new NotFoundError();
+
+    await Book.increment("available", {
+      by: 1,
+      where: { id: borrow.Transaction.bookId },
+      transaction: t,
+    });
+
+    await borrow.destroy({transaction: t})
+  });
+}

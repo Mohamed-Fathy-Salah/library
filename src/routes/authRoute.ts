@@ -5,7 +5,7 @@ import {
     registerUser,
 } from "../controllers/auth";
 import { loginSchema, registerSchema } from "../validation/user";
-import { catchError } from "../util/handleError";
+
 const authRouter = Router();
 
 authRouter.post("/register", validateRequest(registerSchema), registerUser);

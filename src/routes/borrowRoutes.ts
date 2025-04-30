@@ -1,25 +1,24 @@
 import express from "express";
 import {
-  getBorrowData,
-  getAllBorrowsData,
-  createBorrowData,
-  updateBorrowData,
-  returnBookData,
+    getBorrowData,
+    getAllBorrowsData,
+    createBorrowData,
+    returnBookData,
+    deleteBorrowById,
 } from "../controllers/borrow";
-import { defaultLimiter, requireUser } from "../middleware";
+import { defaultLimiter, requireUser, validateRequest } from "../middleware";
+import { createBorrowSchema } from "../validation/borrow";
 
 const router = express.Router();
 
 router.get("/", requireUser, getAllBorrowsData);
 router.get("/:transactionId", requireUser, getBorrowData);
-//todo: validate request
-router.post("/", defaultLimiter, requireUser, createBorrowData);
-router.put("/:transactionId", requireUser, updateBorrowData);
+router.post("/", defaultLimiter, requireUser, validateRequest(createBorrowSchema), createBorrowData);
 router.post("/:transactionId/return", requireUser, returnBookData);
+router.delete("/:transactionId", requireUser, deleteBorrowById);
 
 export default router;
 
-//todo: update new request,response
 /**
  * @swagger
  * components:
@@ -100,6 +99,18 @@ export default router;
  *         schema:
  *           type: integer
  *         description: Filter by user ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: page number
+ *         default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: page count
+ *         default: 10
  *     responses:
  *       200:
  *         description: List of borrows
@@ -264,4 +275,27 @@ export default router;
  *                   example: false
  *       404:
  *         description: Borrow record not found
+ */
+
+/**
+ * @swagger
+ * /borrows/{transactionId}:
+ *   delete:
+ *     summary: Delete a borrow record by transaction ID
+ *     tags: [Borrows]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: transactionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Borrow record deleted
+ *       404:
+ *         description: Borrow not found
+ *       401:
+ *         description: Unauthorized
  */
